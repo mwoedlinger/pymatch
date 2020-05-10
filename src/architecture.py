@@ -4,10 +4,10 @@ from .tensor import Tensor
 class Neuron:
     def __init__(self, in_c: int, name=''):
         self.name = name
-        self.w = [Tensor(random.normalvariate(0, 0.1),
+        self.w = [Tensor(random.normalvariate(0, 0.2),
                          name='{}+p{}'.format(name, n))
                   for n in range(in_c)]
-        self.b = Tensor(random.normalvariate(0, 0.1),
+        self.b = Tensor(random.normalvariate(0, 0.2),
                         name='{}_bias'.format(name))
 
     def __call__(self, x: list):
@@ -24,13 +24,17 @@ class Neuron:
 
 
 class Layer:
-    def __init__(self, in_c, out_c, name=''):
+    def __init__(self, in_c, out_c, name='', activation='relu'):
         self.name = name
+        self.activation = activation
         self.neurons = [Neuron(in_c, name='{}n{}'.format(name, n))
                         for n in range(out_c)]
         
     def __call__(self, x: list):
-        return [n(x) for n in self.neurons]
+        if self.activation == 'relu':
+            return [n(x).relu() for n in self.neurons]
+        elif self.activation == 'identity':
+            return [n(x).relu() for n in self.neurons]
 
     def parameters(self):
         parameterList = []
@@ -51,7 +55,7 @@ class Network:
 
         return x
 
-    def parameters():
+    def parameters(self):
         parameterList = []
 
         for l in self.layers:
@@ -69,7 +73,10 @@ class MLP:
         
         last_channels = in_c
         for n, h in enumerate(hidden):
-            layers.append(Layer(last_channels, h, name='l{}'.format(n)))
+            if n == len(hidden)-1:
+                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='identity'))
+            else:
+                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='relu'))
             last_channels = h
 
         self.network = Network(layers, name='MLP')
@@ -77,7 +84,7 @@ class MLP:
     def __call__(self, x):
         return self.network(x)
 
-    def parameters():
+    def parameters(self):
         return self.network.parameters()
 
     def __repr__(self):
