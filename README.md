@@ -1,2 +1,2 @@
-# numpyNetworks
-Neural networks with numpy
+# simpleNet
+Neural networks from scratch
