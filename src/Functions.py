@@ -1,4 +1,4 @@
-from src.Tensor import *
+from .tensor import Tensor
 
 def mseLoss(pred: list, label: list):
     loss = Tensor(0)
@@ -8,6 +8,3 @@ def mseLoss(pred: list, label: list):
     loss = loss*(1/len(pred))
 
     return loss
-
-def batchAverage(x: list):
-    return x * (1/len(x))

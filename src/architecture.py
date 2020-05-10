@@ -1,5 +1,5 @@
 import random
-from .Tensor import Tensor
+from .tensor import Tensor
 
 class Neuron:
     def __init__(self, in_c: int, name=''):

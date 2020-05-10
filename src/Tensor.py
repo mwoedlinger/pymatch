@@ -131,15 +131,3 @@ class Tensor:
         for d in range(0, maxDepth+1):
             for t in dDict[d]:
                 t._computeGradient()
-
-    def _optimize(self, lr):
-        if not self.no_grad:
-            self.val -= lr * self.grad
-
-    def optimize(self, lr, dDict):
-        # TODO: move outside of class as function
-        maxDepth = max(dDict.keys())
-
-        for d in range(0, maxDepth+1):
-            for t in dDict[d]:
-                t._optimize(lr)
