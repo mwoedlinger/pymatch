@@ -1,13 +1,14 @@
 import random
 from .tensor import Tensor
+from .functions import relu, softmax, sigmoid
 
 class Neuron:
     def __init__(self, in_c: int, name=''):
         self.name = name
-        self.w = [Tensor(random.normalvariate(0, 0.2),
+        self.w = [Tensor(random.normalvariate(0, 0.1),
                          name='{}+p{}'.format(name, n))
                   for n in range(in_c)]
-        self.b = Tensor(random.normalvariate(0, 0.2),
+        self.b = Tensor(random.normalvariate(0, 0.1),
                         name='{}_bias'.format(name))
 
     def __call__(self, x: list):
@@ -32,9 +33,13 @@ class Layer:
         
     def __call__(self, x: list):
         if self.activation == 'relu':
-            return [n(x).relu() for n in self.neurons]
+            return [relu(n(x)) for n in self.neurons]
         elif self.activation == 'identity':
-            return [n(x).relu() for n in self.neurons]
+            return [n(x) for n in self.neurons]
+        elif self.activation == 'softmax':
+            return softmax([n(x) for n in self.neurons])
+        elif self.activation == 'sigmoid':
+            return [sigmoid(n(x)) for n in self.neurons]
 
     def parameters(self):
         parameterList = []
@@ -68,13 +73,13 @@ class Network:
         #TODO
 
 class MLP:
-    def __init__(self, in_c, hidden):
+    def __init__(self, in_c, hidden, activation='softmax'):
         layers = []
         
         last_channels = in_c
         for n, h in enumerate(hidden):
             if n == len(hidden)-1:
-                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='identity'))
+                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation=activation))
             else:
                 layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='relu'))
             last_channels = h
