@@ -1,13 +1,13 @@
 import numpy as np
-from .tensor import Tensor
+from .variable import Variable
 
 
-# Functions on tensors:
-def relu(x: Tensor):
-    if not isinstance(x, Tensor):
-        x = Tensor(x, name=str(x))
+# Functions on Variables:
+def relu(x: Variable):
+    if not isinstance(x, Variable):
+        x = Variable(x, name=str(x))
 
-    out = Tensor(max(x.val, 0), 
+    out = Variable(max(x.val, 0), 
                  children = [x],
                  name='relu({})'.format(x.name))
     out.children = [x]
@@ -22,11 +22,11 @@ def relu(x: Tensor):
     return out
 
 
-def log(x: Tensor):
-    if not isinstance(x, Tensor):
-        x = Tensor(x, name=str(x))
+def log(x: Variable):
+    if not isinstance(x, Variable):
+        x = Variable(x, name=str(x))
 
-    out = Tensor(np.log(x.val), 
+    out = Variable(np.log(x.val), 
                  children = [x],
                  name='log({})'.format(x.name))
     out.children = [x]
@@ -37,11 +37,11 @@ def log(x: Tensor):
 
     return out
 
-def abs(x: Tensor):
-    if not isinstance(x, Tensor):
-        x = Tensor(x, name=str(x))
+def abs(x: Variable):
+    if not isinstance(x, Variable):
+        x = Variable(x, name=str(x))
 
-    out = Tensor(np.abs(x.val), 
+    out = Variable(np.abs(x.val), 
                  children = [x],
                  name='abs({})'.format(x.name))
     out.children = [x]
@@ -55,11 +55,11 @@ def abs(x: Tensor):
 
     return out
 
-def exp(x: Tensor):
-    if not isinstance(x, Tensor):
-        x = Tensor(x, name=str(x))
+def exp(x: Variable):
+    if not isinstance(x, Variable):
+        x = Variable(x, name=str(x))
 
-    out = Tensor(np.abs(x.val), 
+    out = Variable(np.abs(x.val), 
                  children = [x],
                  name='exp({})'.format(x.name))
     out.children = [x]
@@ -75,7 +75,7 @@ def softmax(x: list):
 
     return out
 
-def sigmoid(x: Tensor):
+def sigmoid(x: Variable):
     out = exp(x) * (exp(x) + 1)**(-1)
 
     return out
@@ -91,7 +91,7 @@ def mseLoss(pred: list, label: list, network, l1=False, l2=False, alpha=0.0001):
 
     return loss
 
-def crossentropyLoss(pred: list, label: list, network, l1 = False, l2=False, alpha=0.0001):
+def crossentropyLoss(pred: list, label: list, network, l1=False, l2=False, alpha=0.0001):
     loss = -sum([label[n]*log(pred[n]) for n in range(len(pred))])
 
     if l1:
@@ -100,5 +100,16 @@ def crossentropyLoss(pred: list, label: list, network, l1 = False, l2=False, alp
         loss = loss + alpha * sum([p**2 for p in network.parameters()])
 
     return loss
+
+def maxMarginLoss(pred, label, network, l1=False, l2=False, alpha=0.0001):
+    loss = relu(1 - label[0] * pred[0])
+
+    if l1:
+        loss = loss + alpha * sum([abs(p) for p in network.parameters()])
+    if l2:
+        loss = loss + alpha * sum([p**2 for p in network.parameters()])
+
+    return loss
+
 
     

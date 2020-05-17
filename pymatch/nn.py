@@ -1,34 +1,52 @@
 import random
-from .tensor import Tensor
+from .variable import Variable
 from .functions import relu, softmax, sigmoid
 
 class Neuron:
-    def __init__(self, in_c: int, name=''):
+    """
+    A Neuron computes a linear combination of the feature vector where weights are
+    given by 'Variable' objects to keep track of the computation graph.
+    """
+    def __init__(self, in_c: int, name='', bias=True):
         self.name = name
-        self.w = [Tensor(random.normalvariate(0, 0.1),
+        self.bias = bias
+
+        self.w = [Variable(random.uniform(-1, 1),
                          name='{}+p{}'.format(name, n))
                   for n in range(in_c)]
-        self.b = Tensor(random.normalvariate(0, 0.1),
-                        name='{}_bias'.format(name))
+        
+        if self.bias:
+            self.b = Variable(random.normalvariate(0, 0.1),
+                            name='{}_bias'.format(name))
 
     def __call__(self, x: list):
-        out = Tensor(0)
+        out = Variable(0)
 
         for n in range(len(x)):
             out = out + self.w[n] * x[n]
-        out = out + self.b
+        if self.bias:
+            out = out + self.b
 
         return out
 
     def parameters(self):
-        return self.w + [self.b]
+        if self.bias:
+            return self.w + [self.b]
+        else:
+            return self.w
 
 
 class Layer:
-    def __init__(self, in_c, out_c, name='', activation='relu'):
+    """
+    A layer is a collection of neurons.
+    """
+    def __init__(self, in_c, out_c, name='', bias=True, activation='relu'):
+        self.in_c = in_c
+        self.out_c = out_c
         self.name = name
+
         self.activation = activation
-        self.neurons = [Neuron(in_c, name='{}n{}'.format(name, n))
+        self.neurons = [Neuron(in_c, name='{}n{}'.format(name, n), bias=bias)
                         for n in range(out_c)]
         
     def __call__(self, x: list):
@@ -49,7 +67,13 @@ class Layer:
 
         return parameterList
 
+    def __repr__(self):
+        return '{:10} (in_c = {}, out_c = {}, act = {}'.format('fcn', self.in_c, self.out_c, self.activation)
+
 class Network:
+    """
+    A network is a collection of layers.
+    """
     def __init__(self, layers: list, name=''):
         self.layers = layers
         self.name = name
@@ -69,20 +93,30 @@ class Network:
         return parameterList
 
     def __repr__(self):
-        return self.name
-        #TODO
+        repr_string = self.name + ':\n'
+        for l in self.layers:
+            repr_string += str(l) + '\n'
+
+        return repr_string
 
 class MLP:
-    def __init__(self, in_c, hidden, activation='softmax'):
+    """
+    A multilayer perceptron.
+    """
+    def __init__(self, in_c, hidden, activation='identity'):
         layers = []
         
         last_channels = in_c
-        for n, h in enumerate(hidden):
-            if n == len(hidden)-1:
-                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation=activation))
-            else:
-                layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='relu'))
+        for n in range(len(hidden)-1):
+            h = hidden[n]
+
+            layers.append(Layer(last_channels, h, name='l{}'.format(n), activation='relu'))
             last_channels = h
+        
+        if hidden[-1] == 1:
+            activation = activation
+
+        layers.append(Layer(last_channels, hidden[-1], name='l{}'.format(n), activation=activation))
 
         self.network = Network(layers, name='MLP')
 

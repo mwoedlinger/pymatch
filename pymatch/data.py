@@ -8,7 +8,7 @@ class DataLoader:
         self.idx = 0
 
     def __len__(self):
-        return len(self.data)
+        return round(len(self.data))
 
     def __iter__(self):
         return self
