@@ -89,7 +89,7 @@ class Variable:
         return Variable(x) * self
         
     def __repr__(self):
-        return str(self.val)
+        return '{:0.4f}'.format(self.val)
 
     def __lt__(self, x):
         if not isinstance(x, Variable):

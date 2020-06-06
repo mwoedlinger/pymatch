@@ -1,7 +1,7 @@
 def grad_test():
-    a = Tensor(2, name='a')
-    b = Tensor(3, name='b')
-    c = Tensor(4, name='c')
+    a = Variable(2, name='a')
+    b = Variable(3, name='b')
+    c = Variable(4, name='c')
 
     x = (a + c*(a+b))**2
 

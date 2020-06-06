@@ -3,13 +3,16 @@ from .variable import Variable
 
 
 # Functions on Variables:
+def identity(x: Variable):
+    return x
+
 def relu(x: Variable):
     if not isinstance(x, Variable):
         x = Variable(x, name=str(x))
 
     out = Variable(max(x.val, 0), 
                  children = [x],
-                 name='relu({})'.format(x.name))
+                 name='reLU({})'.format(x.name))
     out.children = [x]
 
     def _computeGradient():
@@ -21,6 +24,23 @@ def relu(x: Variable):
 
     return out
 
+def leaky_relu(x: Variable, alpha=0.01):
+    if not isinstance(x, Variable):
+        x = Variable(x, name=str(x))
+
+    out = Variable(max(x.val, alpha*x.val), 
+                 children = [x],
+                 name='lReLU({})'.format(x.name))
+    out.children = [x]
+
+    def _computeGradient():
+        if x.val > 0:
+            x.grad += out.grad
+        else:
+            x.grad += alpha*out.grad
+    out._computeGradient = _computeGradient
+
+    return out
 
 def log(x: Variable):
     if not isinstance(x, Variable):
@@ -92,6 +112,7 @@ def mseLoss(pred: list, label: list, network, l1=False, l2=False, alpha=0.0001):
     return loss
 
 def crossentropyLoss(pred: list, label: list, network, l1=False, l2=False, alpha=0.0001):
+    pred = softmax(pred)
     loss = -sum([label[n]*log(pred[n]) for n in range(len(pred))])
 
     if l1:
@@ -101,8 +122,8 @@ def crossentropyLoss(pred: list, label: list, network, l1=False, l2=False, alpha
 
     return loss
 
-def maxMarginLoss(pred, label, network, l1=False, l2=False, alpha=0.0001):
-    loss = relu(1 - label[0] * pred[0])
+def maxMarginLoss(pred: list, label: list, network, l1=False, l2=False, alpha=0.0001):
+    loss = relu(1 - label[0] * pred[0])**2
 
     if l1:
         loss = loss + alpha * sum([abs(p) for p in network.parameters()])
