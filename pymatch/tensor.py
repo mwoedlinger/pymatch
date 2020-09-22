@@ -69,7 +69,7 @@ class Tensor:
     def __getitem__(self, idx: int):
         return self.data[idx]
 
-    def __add__(self, other: Tensor):
+    def __add__(self, other):
         """
         Element wise addition.
         """

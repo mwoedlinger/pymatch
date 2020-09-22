@@ -1,4 +1,9 @@
-/old/
-/venv/
-/.vscode/
+old/
+venv/
+env/
+build/
+dist/
+.ipynb_checkpoints
+pymatch.egg-info
+.vscode/
 */__pycache__/
